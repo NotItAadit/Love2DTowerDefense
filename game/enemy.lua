@@ -79,9 +79,8 @@ function drawEnemy(enemy)
         enemyImage = enemyImageDown
     end
     love.graphics.draw(enemyImage, x + enemy.offset, y - enemy.offset, 0, enemy.scaleX, enemy.scaleY)
-    love.graphics.rectangle("line", x, y, enemy.hitboxX, enemy.hitboxY)
-    love.graphics.print(#enemies, 0, 20)
-    love.graphics.print(enemySpeed, 0, 60)
+    -- love.graphics.rectangle("line", x, y, enemy.hitboxX, enemy.hitboxY) -- HITBOX CODE
+    drawHealthbar(enemy)
 end
 
 function createEnemy(x, y, health)
@@ -89,6 +88,7 @@ function createEnemy(x, y, health)
         x = x,
         y = y,
         health = health,
+        maxHealth = health,
         direction = "right",
         speed = enemySpeed,
         progress = 0,
@@ -99,4 +99,17 @@ function createEnemy(x, y, health)
         hitboxX = enemyImage:getWidth() * 5,
         hitboxY = enemyImage:getHeight() * 5,
     }
+end
+
+function drawHealthbar(enemy)
+    local tileSize = 80
+    local x = (enemy.x - 1) * tileSize + enemy.progress * tileSize * (enemy.direction == "right" and 1 or enemy.direction == "left" and -1 or 0)
+    local y = ((enemy.y - 1) * tileSize + enemy.progress * tileSize * (enemy.direction == "down" and 1 or enemy.direction == "up" and -1 or 0))
+    
+    love.graphics.setColor(0, 0, 0)
+    love.graphics.rectangle("fill", x - 3, y - 8, 81, 16)
+
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.rectangle("fill", x, y - 5, (enemy.health / enemy.maxHealth) * 75, 10)
+    love.graphics.setColor(1, 1, 1)
 end

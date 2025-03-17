@@ -103,6 +103,7 @@ function createTower(shootSpeed)
     y = 0,
     radius = 200,
     timer = 0,
+    hierarchy = 0
     }
 end
 
@@ -146,23 +147,28 @@ function updateTower(tower, dt)
         placeY = (math.ceil((tower.y - 40) / tileSize) * tileSize)
         adjustedPlaceX = ((placeX - 40) / tileSize) + 1
         adjustedPlaceY = (placeY / tileSize) + 1
-        tower.x = placeX
-        tower.y = placeY
 
-        if(map[adjustedPlaceY][adjustedPlaceX] ~= 0) then
-            tower.canPlace = false
-        else
-            tower.canPlace = true
-        end
-    
-        if love.mouse.isDown(1) and tower.draggable then
+        if placeX ~= nil and placeY ~= nil and adjustedPlaceX ~= nil and adjustedPlaceY ~= nil then
             tower.x = placeX
             tower.y = placeY
-            if tower.canPlace then
-                tower.draggable = false
-                isHolding = false
+            
+            if(map[adjustedPlaceY][adjustedPlaceX] ~= 0) then
+                tower.canPlace = false
+            else
+                tower.canPlace = true
+            end
+    
+            if love.mouse.isDown(1) and tower.draggable then
+                tower.x = placeX
+                tower.y = placeY
+                if tower.canPlace then
+                    tower.draggable = false
+                    isHolding = false
+              end
             end
         end
+
+        tower.hierarchy = tower.y
     end
 
     tower.timer = tower.timer + dt
@@ -264,11 +270,8 @@ end
 function Tower:draw()
     for i = #towers, 1, -1 do
         drawTower(towers[i])
-        love.graphics.print(adjustedPlaceX, 0, 200)
-        love.graphics.print(adjustedPlaceY, 0, 210)
     end
 
-    -- Draw bullets with rotation
     for _, bullet in ipairs(bullets) do
         love.graphics.draw(
             arrowImage,
@@ -280,9 +283,5 @@ function Tower:draw()
             arrowImage:getWidth() / 2, -- Center X
             arrowImage:getHeight() / 2 -- Center Y
         )
-    end
-
-    if towers[1] ~= nil then
-        love.graphics.print(towers[1].timer, 0, 70)
     end
 end
