@@ -4,11 +4,12 @@ function Enemy:load()
     enemies = {}
     enemySpeed = 1;
     love.graphics.setDefaultFilter("nearest", "nearest")
-    enemyImageRight = love.graphics.newImage("slime.png")
-    enemyImageDown = love.graphics.newImage("slimefront.png")
-    enemyImageUp = love.graphics.newImage("slimeup.png")
-    enemyImageLeft = love.graphics.newImage("slimeleft.png")
+    enemyImageRight = love.graphics.newImage("enemyright.png")
+    enemyImageDown = love.graphics.newImage("enemydown.png")
+    enemyImageUp = love.graphics.newImage("enemyup.png")
+    enemyImageLeft = love.graphics.newImage("enemyleft.png")
     enemyImage = enemyImageRight
+    stunTime = 0.5
 end
 
 function Enemy:update(dt)
@@ -63,6 +64,19 @@ function updateEnemy(enemy, dt)
     if enemy.health <= 0 then
         table.remove(enemies, enemy)
     end
+
+    -- STUN LOGIC
+
+    if stunned then
+        enemy.speed = 0
+
+        enemy.stunTimer = enemy.stunTimer + dt
+        if enemy.stunTimer >= stunTime then
+            enemy.stunned = false
+            enemy.stunTimer = 0
+            enemy.speed = enemySpeed
+        end
+    end
 end
 
 function drawEnemy(enemy)
@@ -78,9 +92,12 @@ function drawEnemy(enemy)
     elseif(enemy.direction == "down") then
         enemyImage = enemyImageDown
     end
-    love.graphics.draw(enemyImage, x + enemy.offset, y - enemy.offset, 0, enemy.scaleX, enemy.scaleY)
-    -- love.graphics.rectangle("line", x, y, enemy.hitboxX, enemy.hitboxY) -- HITBOX CODE
-    drawHealthbar(enemy)
+    love.graphics.draw(enemyImage, x + enemy.xOffset, y - enemy.yOffset, 0, enemy.scaleX, enemy.scaleY)
+    love.graphics.rectangle("line", x, y, enemy.hitboxX, enemy.hitboxY) -- HITBOX CODE
+    --drawHealthbar(enemy)
+
+    love.graphics.print(tostring(enemy.x), enemy.x, enemy.y)
+    love.graphics.print(tostring(enemy.y), enemy.x, enemy.y + 20)
 end
 
 function createEnemy(x, y, health)
@@ -92,12 +109,16 @@ function createEnemy(x, y, health)
         direction = "right",
         speed = enemySpeed,
         progress = 0,
-        offset = 0,
+        xOffset = -35,
+        yOffset = 40,
         distance = 0,
         scaleX = 5,
         scaleY = 5,
         hitboxX = enemyImage:getWidth() * 5,
         hitboxY = enemyImage:getHeight() * 5,
+        image = enemyImage,
+        stunTimer = 0,
+        stunned = false,
     }
 end
 
@@ -107,9 +128,9 @@ function drawHealthbar(enemy)
     local y = ((enemy.y - 1) * tileSize + enemy.progress * tileSize * (enemy.direction == "down" and 1 or enemy.direction == "up" and -1 or 0))
     
     love.graphics.setColor(0, 0, 0)
-    love.graphics.rectangle("fill", x - 3, y - 8, 81, 16)
+    love.graphics.rectangle("fill", x - 18 - enemy.xOffset, y - 23 - enemy.yOffset, 70, 16)
 
     love.graphics.setColor(1, 0, 0)
-    love.graphics.rectangle("fill", x, y - 5, (enemy.health / enemy.maxHealth) * 75, 10)
+    love.graphics.rectangle("fill", x - 15 - enemy.xOffset, y - 20 - enemy.yOffset, (enemy.health / enemy.maxHealth) * 65, 10)
     love.graphics.setColor(1, 1, 1)
 end
